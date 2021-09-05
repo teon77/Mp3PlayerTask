@@ -3,7 +3,7 @@ const player = {
     {
       id: 1,
       title: 'Vortex',
-      album: 'WallflowersWoW',
+      album: 'Wallflowers',
       artist: 'Jinjer',
       duration: 242,
     },
@@ -48,12 +48,12 @@ const player = {
     { id: 5, name: 'Israeli', songs: [4, 5] },
   ],
   playSong(song) {
-    console.log(/* your code here */)
-  },
+    console.log(`Playing ${song.title} from ${song.album} by ${song.artist} | ${showDuration(song.duration)}`);
+  }
 }
 
 function playSong(id) {
-  // your code here
+ return player.playSong(findSongObjectById(id));
 }
 
 function removeSong(id) {
@@ -105,3 +105,22 @@ module.exports = {
   searchByQuery,
   searchByDuration,
 }
+
+
+//function to display the duration in requested format
+function showDuration(duration){   
+  let str=String(duration);     //turn to string
+if(str.length==3) return `0${str.charAt(0)}:${(str.charAt(1))}${str.charAt(2)}`;    
+  return `0${str.charAt(0)}:${(str.charAt(1))}`;
+}  /*assuming there are no songs longer than 10 minutes ||not a final version*/
+
+
+//getting id of song and returning the whole song object
+function findSongObjectById(id){  
+  const arr =player.songs;
+  for(let i of arr){
+    if(i.id==id) return i;
+  }
+      console.log("There is no song with that Id");
+}
+
