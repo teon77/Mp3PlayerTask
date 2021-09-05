@@ -53,16 +53,23 @@ const player = {
 }
 
 function playSong(id) {
- return player.playSong(findSongObjectById(id));
+ return player.playSong(SongObjectById(id));
 }
+
+
 
 function removeSong(id) {
-  // your code here
-}
+  let index =SongIndexById(player.songs,id)
+  player.songs.splice(index,1); //removes 1 cell from the index
+  for(let i=0;i<player.playlists.length;i++){  //iterate through different playlists
+    let index2 =IndexInPlaylist(player.playlists[i].songs,id)
+    player.playlists[0].songs.splice(index2,1);
+    }
+  }
 
-function addSong(title, album, artist, duration, id) {
-  // your code here
-}
+  function addSong(title, album, artist, duration, id){
+    // your code here
+  }
 
 function removePlaylist(id) {
   // your code here
@@ -109,18 +116,39 @@ module.exports = {
 
 //function to display the duration in requested format
 function showDuration(duration){   
-  let str=String(duration);     //turn to string
-if(str.length==3) return `0${str.charAt(0)}:${(str.charAt(1))}${str.charAt(2)}`;    
-  return `0${str.charAt(0)}:${(str.charAt(1))}`;
-}  /*assuming there are no songs longer than 10 minutes ||not a final version*/
+  let date = new Date(0);
+date.setSeconds(duration); 
+let timeString = date.toISOString().substr(11, 8);
+return timeString;
+} 
 
 
 //getting id of song and returning the whole song object
-function findSongObjectById(id){  
+function SongObjectById(id){  
   const arr =player.songs;
   for(let i of arr){
     if(i.id==id) return i;
   }
       console.log("There is no song with that Id");
+}
+
+
+//find the index of the song with given id, return the index
+function SongIndexById(arr,find){
+for(let i=0;i< arr.length;i++){
+  if(arr[i].id==find){
+    return i;
+  }
+}
+}
+
+
+//find the index of id inside the song array in playlists
+function IndexInPlaylist(arr,find){
+  for(let i=0;i< arr.length;i++){
+    if(arr[i]==find){
+      return i;
+}
+  }
 }
 
