@@ -97,7 +97,14 @@ function playPlaylist(id) {
 }
 
 function editPlaylist(playlistId, songId) {
-  // your code here
+  if(ObjectById(player.playlists,playlistId).songs.includes(songId,0)){ //checks if the song is in the playlist
+      ObjectById(player.playlists,playlistId).songs.splice(IndexById(songId),1);//removes the song
+      if(ObjectById(player.playlists,playlistId).songs.length==0)//checks if the playlist is empty
+          removePlaylist(playlistId); //deletes the array
+      
+  } else{ //connected to first if()
+         ObjectById(player.playlists,playlistId).songs.push(songId); //adding it to the end of the playlist
+  }
 }
 
 function playlistDuration(id) {
