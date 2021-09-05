@@ -53,44 +53,47 @@ const player = {
 }
 
 function playSong(id) {
- return player.playSong(SongObjectById(id));
+ return player.playSong(ObjectById(player.songs,id));
 }
 
 
-
 function removeSong(id) {
-  let index =SongIndexById(player.songs,id)
-  player.songs.splice(index,1); //removes 1 cell from the index
+  player.songs.splice(IndexById(player.songs,id),1); //removes 1 cell from the index
   for(let i=0;i<player.playlists.length;i++){  //iterate through different playlists
     let index2 =IndexInPlaylist(player.playlists[i].songs,id)
-    player.playlists[0].songs.splice(index2,1);
+    player.playlists[i].songs.splice(index2,1);
     }
   }
 
-  function addSong(title, album, artist, duration, id=generateIdForSong(player.songs)) {
-    let newSong = {
+  function addSong(title, album, artist, duration, id=generateId(player.songs)) {
+    player.songs.push(newSong = { //push a new object to the array
       title: title,
       album: album,
       artist: artist,
       duration: showDuration(duration),
       id: id
-  };
-  player.songs.push(newSong);
+  });
   return id;
   }
   
   
 
 function removePlaylist(id) {
-  // your code here
+    player.playlists.splice(IndexById(player.playlists,id),1);
 }
 
-function createPlaylist(name, id) {
-  // your code here
+function createPlaylist(name, id=generateId(player.playlists) ) {
+  player.playlists.push(newPlaylist = {
+      name: name,
+      id: id,
+      songs: []
+  })
 }
 
 function playPlaylist(id) {
-  // your code here
+  ObjectById(player.playlists,id).songs.forEach(song => {
+    playSong(song);
+  });
 }
 
 function editPlaylist(playlistId, songId) {
@@ -133,27 +136,27 @@ return timeString;
 } 
 
 
-//getting id of song and returning the whole song object
-function SongObjectById(id){  
-  const arr =player.songs;
+//getting id of Item in array and returning the whole object
+function ObjectById(arr,id){  
   for(let i of arr){
     if(i.id==id) return i;
   }
-      console.log("There is no song with that Id");
+      console.log("There is no Item with that Id");
 }
 
 
-//find the index of the song with given id, return the index
-function SongIndexById(arr,find){
-for(let i=0;i< arr.length;i++){
-  if(arr[i].id==find){
-    return i;
+//find the index of an Item with given id,
+// return the index at the array
+function IndexById(arr,find){
+  for(let i=0;i< arr.length;i++){
+    if(arr[i].id==find){
+     return i;
+   }
   }
 }
-}
 
 
-//find the index of id inside the song array in playlists
+//find the index of id at songs array in property playlists
 function IndexInPlaylist(arr,find){
   for(let i=0;i< arr.length;i++){
     if(arr[i]==find){
@@ -161,13 +164,14 @@ function IndexInPlaylist(arr,find){
 }
   }
 }
+
 //looking for highest id of song in the array, returning that value +1
 //to prevent duplicates
-function generateIdForSong(arr){
+function generateId(arr){
   let highestId =0;
-  for(let i=0;i<arr.length;i++){
+    for(let i=0;i<arr.length;i++){
       if(arr.id>highestId) highestId=arr.id;
-  }
-  return (highestId+1);
+    }
+     return (highestId+1);
   }                                     
 
