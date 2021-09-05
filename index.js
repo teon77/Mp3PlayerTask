@@ -67,9 +67,19 @@ function removeSong(id) {
     }
   }
 
-  function addSong(title, album, artist, duration, id){
-    // your code here
+  function addSong(title, album, artist, duration, id=generateIdForSong(player.songs)) {
+    let newSong = {
+      title: title,
+      album: album,
+      artist: artist,
+      duration: showDuration(duration),
+      id: id
+  };
+  player.songs.push(newSong);
+  return id;
   }
+  
+  
 
 function removePlaylist(id) {
   // your code here
@@ -151,4 +161,13 @@ function IndexInPlaylist(arr,find){
 }
   }
 }
+//looking for highest id of song in the array, returning that value +1
+//to prevent duplicates
+function generateIdForSong(arr){
+  let highestId =0;
+  for(let i=0;i<arr.length;i++){
+      if(arr.id>highestId) highestId=arr.id;
+  }
+  return (highestId+1);
+  }                                     
 
