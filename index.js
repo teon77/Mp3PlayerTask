@@ -3,7 +3,7 @@ const player = {
     {
       id: 1,
       title: 'Vortex',
-      album: 'Wallflowers',
+      album: 'WallflowersWoW',
       artist: 'Jinjer',
       duration: 242,
     },
