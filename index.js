@@ -58,23 +58,25 @@ function playSong(id) {
 
 
 function removeSong(id) {
-  if(IndexById(player.songs,id)==undefined) throw "non-existent ID";
-  player.songs.splice(IndexById(player.songs,id),1); //removes 1 cell from the index
-  for(let i=0;i<player.playlists.length;i++){  //iterate through different playlists
-    let index2 =IndexInPlaylist(player.playlists[i].songs,id)
-    player.playlists[i].songs.splice(index2,1);
+  if(IndexById(player.songs,id)===undefined) throw "non-existent ID";
+  player.songs.splice(IndexById(player.songs,id),1);  // removes 1 cell from the index
+  for(let i=0;i<player.playlists.length;i++){   // iterate through different playlists
+       let index2 = IndexById(player.playlists[i].songs,id) // finiding the index inside the array
+       player.playlists[i].songs.splice(index2,1);
     }
   }
 
   function addSong(title, album, artist, duration, id) {
-    if(IndexById(player.songs,id)!=undefined) throw "This ID is Taken";
-    player.songs.push(newSong = { //push a new object to the array
-      title: title,
-      album: album,
-      artist: artist,
-      duration: showDuration(duration),
-      id: generateId(player.songs,id)
-  });
+    if(ObjectById(player.songs,id)!==undefined) throw ("This ID is Taken");
+      if(id===undefined) id = generateId(player.songs);
+      convertToSeconds(duration)
+      player.songs.push({ // push a new object to the array
+        title: title,
+        album: album,
+        artist: artist,
+        duration: convertToSeconds(duration),
+        id: id
+    });
   return id;
   }
   
@@ -85,13 +87,16 @@ function removePlaylist(id) {
     player.playlists.splice(IndexById(player.playlists,id),1);
 }
 
-function createPlaylist(name, id=generateId(player.playlists) ) {
+function createPlaylist(name, id)  {
   if(IndexById(player.playlists,id)!=undefined) throw "This ID is Taken";
-  player.playlists.push(newPlaylist = {
-      name: name,
-      id: id,
-      songs: []
+  if(id===undefined) id = generateId(player.playlists);
+ 
+     player.playlists.push({
+        name: name,
+        id: id,
+        songs: []
   })
+  return id;
 }
 
 function playPlaylist(id) {
@@ -101,15 +106,19 @@ function playPlaylist(id) {
 }
 
 function editPlaylist(playlistId, songId) {
-  let arr =ObjectById(player.playlists,playlistId).songs;
-  if(arr.includes(songId,0)){ //checks if the song is in the playlist
-      arr.splice(IndexById(arr,songId),1);//removes the song
-      if(arr.length==0){//checks if the playlist is empty
+    if(IndexById(player.songs,songId)===undefined) throw "non-existent ID";
+    if(IndexById(player.playlists,playlistId)===undefined) throw "non-existent ID";
+  let arr = ObjectById(player.playlists,playlistId).songs;
+  if(arr.includes(songId,0)){            //checks if the song is in the playlist
+      arr.splice(IndexById(arr,songId),1);     //removes the song
+      if(arr.length===0){                   //checks if the playlist is empty
           removePlaylist(playlistId); //deletes the Playlist
       }
-     } else{//connected to the first if()
-     arr.push(songId);//adding the song to the end of the playlist
-           throw "non-existent song ID"
+     }
+      else{         //connected to the first if()
+        arr.push(songId);
+                       //adding the song to the end of the playlist
+           
      }
   }
 
@@ -153,7 +162,7 @@ function showDuration(duration){
 } 
 
 
-//getting id of Item in array and returning the whole object
+//gets an id of Item in an array and returning the whole object
 function ObjectById(arr,id){  
   for(let i of arr){
     if(i.id==id) return i;
@@ -162,8 +171,9 @@ function ObjectById(arr,id){
 }
 
 
-//find the index of an Item with given id,
+// find the index of an Item with given id,
 // return the index at the array
+// for songs array in player
 function IndexById(arr,find) {
   for(let i = 0;i < arr.length; i++){
     if(arr[i].id==find){
@@ -174,28 +184,22 @@ function IndexById(arr,find) {
 }
 
 
-//find the index of id at songs array in property playlists
-function IndexInPlaylist(arr,find) {
-  for(let i = 0;i < arr.length; i++){
-    if(arr[i]==find){
-      return i;
-}
-  }return undefined;
-}
 
 //looking for highest id of song in the array, returning that value +1
 //to prevent duplicates
-function generateId(arr,requestedId) {
-  if(IndexById(arr,requestedId)==undefined) return requestedId;
-  let highestId =0;
+function generateId(arr) {
+  if(arr.length===0) return 1;
+  let highestId = 0;
     for(let i=0;i<arr.length;i++){
       if(arr[i].id>highestId) highestId=arr[i].id;
     }
      return (highestId+1);
   }     
+
+  // convert mm:ss to number 
+  function convertToSeconds(time){
+    let timeArr = time.split(":");
+    let seconds = timeArr[0]*60 + timeArr[1]*1;   //uses timeArr[i] as number 
+    return seconds;
+  }
   
-  
-  //gets an id and returns the song duration
-function getSongDuration(id){
-return ObjectById(id).duration;
-}
