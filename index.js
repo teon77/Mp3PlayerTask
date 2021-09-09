@@ -83,12 +83,12 @@ function removeSong(id) {
   
 
 function removePlaylist(id) {
-  if(IndexById(player.playlists,id)==undefined) throw "non-existent ID";
+  if(IndexById(player.playlists,id)===undefined) throw "non-existent ID";
     player.playlists.splice(IndexById(player.playlists,id),1);
 }
 
 function createPlaylist(name, id)  {
-  if(IndexById(player.playlists,id)!=undefined) throw "This ID is Taken";
+  if(IndexById(player.playlists,id)!==undefined) throw "This ID is Taken";
   if(id===undefined) id = generateId(player.playlists);
  
      player.playlists.push({
@@ -124,16 +124,32 @@ function editPlaylist(playlistId, songId) {
 
 
 function playlistDuration(id) {
-  let total= 0;
-  const arr= ObjectById(player.playlists,id).songs;
-  for(let i= 0; i<arr.length; i++){
-    total+=ObjectById(player.songs,arr[i]).duration;
+  let total = 0;
+  const arr = ObjectById(player.playlists,id).songs;
+  for(let i = 0; i<arr.length; i++){
+    total+= ObjectById(player.songs,arr[i]).duration; //getting the song duration from the property songs in player
   }
   return total;
 }
 
 function searchByQuery(query) {
-  // your code here
+  query = query.toLowerCase();    // use query in lower case
+  let result = { songs: [] , playlists: []}
+    for(let cell of player.songs) {    
+        for(let prop in cell) {       // for every property in every cell of the songs array
+          if(`${cell[prop]}`.toLowerCase().includes(query,0))
+             if(IndexById(result.songs,cell.id)===undefined)  // I dont want songs to appear more than once
+                 result.songs.push(cell);
+        }
+    }
+    for(let cell of player.playlists){     // for every property in every cell of the playlists array
+      if(cell.name.toLowerCase().includes(query,0)) 
+         if(IndexById(result.playlists,cell.id)===undefined) //  I dont want playlists to appear more than once
+             result.playlists.push(cell);
+    }
+      result.songs.sort((a,b) => { if(a.title < b.title) return -1});   //just sorting didnt wanna use an extra function
+      result.playlists.sort((a,b) => { if(a.name < b.name) return -1});
+      return result;
 }
 
 function searchByDuration(duration) {
@@ -163,6 +179,7 @@ function showDuration(duration){
 
 
 //gets an id of Item in an array and returning the whole object
+// returns undefined if not found
 function ObjectById(arr,id){  
   for(let i of arr){
     if(i.id==id) return i;
@@ -173,7 +190,7 @@ function ObjectById(arr,id){
 
 // find the index of an Item with given id,
 // return the index at the array
-// for songs array in player
+// returns undefined if not found 
 function IndexById(arr,find) {
   for(let i = 0;i < arr.length; i++){
     if(arr[i].id==find){
@@ -202,4 +219,3 @@ function generateId(arr) {
     let seconds = timeArr[0]*60 + timeArr[1]*1;   //uses timeArr[i] as number 
     return seconds;
   }
-  
