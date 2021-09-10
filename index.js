@@ -53,23 +53,25 @@ const player = {
 }
 
 function playSong(id) {
+  try {
  return player.playSong(ObjectById(player.songs,id));
+  }
+  catch {
+    throw "non-existent Song ID"
+  }
 }
-
 
 function removeSong(id) {
   if(IndexById(player.songs,id)===undefined) throw "non-existent ID";
   player.songs.splice(IndexById(player.songs,id),1);  // removes 1 cell from the index
-  for(let i=0;i<player.playlists.length;i++){   // iterate through different playlists
-       let index2 = IndexById(player.playlists[i].songs,id) // finiding the index inside the array
-       player.playlists[i].songs.splice(index2,1);
+  for(let i = 0; i < player.playlists.length; i++){   // iterate through different playlists
+       let index = IndexById(player.playlists[i].songs,id) // finiding the index inside the array
+       player.playlists[i].songs.splice(index,1);
     }
   }
 
-  function addSong(title, album, artist, duration, id) {
+  function addSong(title, album, artist, duration, id= generateId(player.songs)) {
     if(ObjectById(player.songs,id)!==undefined) throw ("This ID is Taken");
-      if(id===undefined) id = generateId(player.songs);
-      convertToSeconds(duration)
       player.songs.push({ // push a new object to the array
         title: title,
         album: album,
@@ -83,14 +85,13 @@ function removeSong(id) {
   
 
 function removePlaylist(id) {
-  if(IndexById(player.playlists,id)===undefined) throw "non-existent ID";
-    player.playlists.splice(IndexById(player.playlists,id),1);
+  if(IndexById(player.playlists,id)===undefined) throw "non-existent Playlist ID";
+    player.playlists.splice(IndexById(player.playlists,id),1);  //remove one cell from the index
 }
 
-function createPlaylist(name, id)  {
+function createPlaylist(name, id = generateId(player.playlists))  {
   if(IndexById(player.playlists,id)!==undefined) throw "This ID is Taken";
-  if(id===undefined) id = generateId(player.playlists);
- 
+
      player.playlists.push({
         name: name,
         id: id,
@@ -100,14 +101,19 @@ function createPlaylist(name, id)  {
 }
 
 function playPlaylist(id) {
-  ObjectById(player.playlists,id).songs.forEach(song => {
+ try{ ObjectById(player.playlists,id).songs.forEach(song => {
     playSong(song);
   });
 }
+catch {
+  throw "non-existent Playlist ID";
+}
+}
+
 
 function editPlaylist(playlistId, songId) {
-    if(IndexById(player.songs,songId)===undefined) throw "non-existent ID";
-    if(IndexById(player.playlists,playlistId)===undefined) throw "non-existent ID";
+    if(IndexById(player.songs,songId)===undefined) throw "non-existent Song ID";
+    if(IndexById(player.playlists,playlistId)===undefined) throw "non-existent Playlist ID";
   let arr = ObjectById(player.playlists,playlistId).songs;
   if(arr.includes(songId,0)){            //checks if the song is in the playlist
       arr.splice(IndexById(arr,songId),1);     //removes the song
@@ -115,24 +121,29 @@ function editPlaylist(playlistId, songId) {
           removePlaylist(playlistId); //deletes the Playlist
       }
      }
-      else{         //connected to the first if()
-        arr.push(songId);
-                       //adding the song to the end of the playlist
-           
+      else{            //connected to the first if()
+        arr.push(songId);   //adding the song to the end of the playlist
      }
   }
 
 
+  // gets a playlist id and returning its duration
 function playlistDuration(id) {
+  try{
   let total = 0;
   const arr = ObjectById(player.playlists,id).songs;
-  for(let i = 0; i<arr.length; i++){
-    total+= ObjectById(player.songs,arr[i]).duration; //getting the song duration from the property songs in player
+  for(let i = 0; i < arr.length; i++){
+    total += ObjectById(player.songs,arr[i]).duration; //getting the song duration from the property songs in player
   }
   return total;
 }
+catch {
+   throw "There isn`t such Playlist";
+}
+}
 
 function searchByQuery(query) {
+  try{
   query = query.toLowerCase();    // use query in lower case
   let result = { songs: [] , playlists: []}
     for(let cell of player.songs) {    
@@ -142,7 +153,7 @@ function searchByQuery(query) {
                  result.songs.push(cell);
         }
     }
-    for(let cell of player.playlists){     // for every property in every cell of the playlists array
+    for(let cell of player.playlists){     // for every cell of the playlists array
       if(cell.name.toLowerCase().includes(query,0)) 
          if(IndexById(result.playlists,cell.id)===undefined) //  I dont want playlists to appear more than once
              result.playlists.push(cell);
@@ -150,10 +161,38 @@ function searchByQuery(query) {
       result.songs.sort((a,b) => { if(a.title < b.title) return -1});   //just sorting didnt wanna use an extra function
       result.playlists.sort((a,b) => { if(a.name < b.name) return -1});
       return result;
+  }
+  catch{
+    throw "It seems like you dont have any Songs or Playlists";
+  }
 }
 
 function searchByDuration(duration) {
-  // your code here
+  let converted = convertToSeconds(duration);
+   try {
+  let closestSong = player.songs[0],      // Initialize
+       closestPlay = player.playlists[0],    // Initialize
+         gapSong = Math.abs(player.songs[0].duration - converted);   // Initialize
+    for(let i = 1; i < player.songs.length; i++){
+        if(Math.abs(player.songs[i].duration - converted) < gapSong){  // if we found a smaller gap
+            closestSong = player.songs[i];       // save the song object
+            gapSong = Math.abs(player.songs[i].duration - converted);  // define a new gap
+    }
+  }
+  let gapPlay = Math.abs(playlistDuration(player.playlists[0].id) - converted);    // Initialize
+  for(let i = 1; i < player.playlists.length; i++){
+      if(Math.abs(playlistDuration(player.playlists[i].id) - converted) < gapPlay){     // if we found a smaller gap
+          closestPlay = player.playlists[i];                                   // save the playlist object
+          gapPlay = Math.abs(playlistDuration(player.playlists[i].id) - converted);     // define new gap
+  }
+}
+    if(gapPlay < gapSong)       // compare the gaps
+      return closestPlay;
+      return closestSong;
+}
+catch{
+  throw "It seems like you dont have any Songs or Playlists";
+} 
 }
 
 module.exports = {
@@ -173,7 +212,7 @@ module.exports = {
 
 //function to display the duration in requested format
 function showDuration(duration){ 
-  let x= new Date(duration * 1000).toISOString().substr(14, 5);
+  let x = new Date(duration * 1000).toISOString().substr(14, 5);
   return x;
 } 
 
@@ -215,7 +254,13 @@ function generateId(arr) {
 
   // convert mm:ss to number 
   function convertToSeconds(time){
+    try {
     let timeArr = time.split(":");
     let seconds = timeArr[0]*60 + timeArr[1]*1;   //uses timeArr[i] as number 
     return seconds;
+    }
+    catch {
+      throw "Please use the mm:ss Form as a String";
+    }
   }
+  
