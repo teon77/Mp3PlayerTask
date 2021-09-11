@@ -91,8 +91,7 @@ function removePlaylist(id) {
 
 function createPlaylist(name, id = generateId(player.playlists))  {
   if(IndexById(player.playlists,id)!==undefined) throw "This ID is Taken";
-
-     player.playlists.push({
+      player.playlists.push({
         name: name,
         id: id,
         songs: []
@@ -116,7 +115,7 @@ function editPlaylist(playlistId, songId) {
     if(IndexById(player.playlists,playlistId)===undefined) throw "non-existent Playlist ID";
   let arr = ObjectById(player.playlists,playlistId).songs;
   if(arr.includes(songId,0)){            //checks if the song is in the playlist
-      arr.splice(IndexById(arr,songId),1);     //removes the song
+      arr.splice(arr.indexOf(songId),1);     //removes the song
       if(arr.length===0){                   //checks if the playlist is empty
           removePlaylist(playlistId); //deletes the Playlist
       }
@@ -186,7 +185,7 @@ function searchByDuration(duration) {
           gapPlay = Math.abs(playlistDuration(player.playlists[i].id) - converted);     // define new gap
   }
 }
-    if(gapPlay < gapSong)       // compare the gaps
+    if(gapPlay < gapSong)       // compare the gaps, return the smaller
       return closestPlay;
       return closestSong;
 }
@@ -210,20 +209,31 @@ module.exports = {
 }
 
 
-//function to display the duration in requested format
+// function to display the duration in requested format
+// turns number to mm:ss;
 function showDuration(duration){ 
+  try {
   let x = new Date(duration * 1000).toISOString().substr(14, 5);
   return x;
+  }
+  catch {
+    throw "Please send this function a number"
+  }
 } 
 
 
 //gets an id of Item in an array and returning the whole object
 // returns undefined if not found
 function ObjectById(arr,id){  
+try {
   for(let i of arr){
     if(i.id==id) return i;
   }
       return undefined;
+}
+catch {
+  throw "You should call this function with an array and an id of an item in that array";
+}
 }
 
 
@@ -231,25 +241,29 @@ function ObjectById(arr,id){
 // return the index at the array
 // returns undefined if not found 
 function IndexById(arr,find) {
-  for(let i = 0;i < arr.length; i++){
-    if(arr[i].id==find){
-     return i;
-   }
+try {
+    for(let i of arr){
+      if(i.id==find){
+       return i;
+    }
   }
     return undefined;
 }
+catch {
+  throw "You should call this function with an array and an id of an item in that array";
+}
+}
 
 
-
-//looking for highest id of song in the array, returning that value +1
-//to prevent duplicates
+// looking for highest id of song in the array, returning that value +1
+// to prevent duplicates
+// function will return 1 for empty or invalid array
 function generateId(arr) {
-  if(arr.length===0) return 1;
   let highestId = 0;
     for(let i=0;i<arr.length;i++){
       if(arr[i].id>highestId) highestId=arr[i].id;
     }
-     return (highestId+1);
+     return (highestId+1);   
   }     
 
   // convert mm:ss to number 
