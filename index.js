@@ -54,7 +54,7 @@ const player = {
 
 function playSong(id) {
   try {
- return player.playSong(ObjectById(player.songs,id));
+ return player.playSong(getById(player.songs,id));
   }
   catch {
     throw "non-existent Song ID"
@@ -62,16 +62,16 @@ function playSong(id) {
 }
 
 function removeSong(id) {
-  if(IndexById(player.songs,id)===undefined) throw "non-existent ID";
-  player.songs.splice(IndexById(player.songs,id),1);  // removes 1 cell from the index
+  if(getById(player.songs,id)===undefined) throw "non-existent ID";
+  player.songs.splice(getById(player.songs,id),1);  // removes 1 cell from the index
   for(let i = 0; i < player.playlists.length; i++){   // iterate through different playlists
-       let index = IndexById(player.playlists[i].songs,id) // finiding the index inside the array
+       let index = player.playlists[i].songs.indexOf(id) // finiding the index inside the array
        player.playlists[i].songs.splice(index,1);
     }
   }
 
   function addSong(title, album, artist, duration, id= generateId(player.songs)) {
-    if(ObjectById(player.songs,id)!==undefined) throw ("This ID is Taken");
+    if(getById(player.songs,id)!==undefined) throw ("This ID is Taken");
       player.songs.push({ // push a new object to the array
         title: title,
         album: album,
@@ -85,12 +85,12 @@ function removeSong(id) {
   
 
 function removePlaylist(id) {
-  if(IndexById(player.playlists,id)===undefined) throw "non-existent Playlist ID";
-    player.playlists.splice(IndexById(player.playlists,id),1);  //remove one cell from the index
+  if(getById(player.playlists,id)===undefined) throw "non-existent Playlist ID";
+    player.playlists.splice(getById(player.playlists,id),1);  //remove one cell from the index
 }
 
 function createPlaylist(name, id = generateId(player.playlists))  {
-  if(IndexById(player.playlists,id)!==undefined) throw "This ID is Taken";
+  if(getById(player.playlists,id)!==undefined) throw "This ID is Taken";
       player.playlists.push({
         name: name,
         id: id,
@@ -100,7 +100,7 @@ function createPlaylist(name, id = generateId(player.playlists))  {
 }
 
 function playPlaylist(id) {
- try{ ObjectById(player.playlists,id).songs.forEach(song => {
+ try{ getById(player.playlists,id).songs.forEach(song => {
     playSong(song);
   });
 }
@@ -111,9 +111,9 @@ catch {
 
 
 function editPlaylist(playlistId, songId) {
-    if(IndexById(player.songs,songId)===undefined) throw "non-existent Song ID";
-    if(IndexById(player.playlists,playlistId)===undefined) throw "non-existent Playlist ID";
-  let arr = ObjectById(player.playlists,playlistId).songs;
+    if(getById(player.songs,songId)===undefined) throw "non-existent Song ID";
+    if(getById(player.playlists,playlistId)===undefined) throw "non-existent Playlist ID";
+  let arr = getById(player.playlists,playlistId).songs;
   if(arr.includes(songId,0)){            //checks if the song is in the playlist
       arr.splice(arr.indexOf(songId),1);     //removes the song
       if(arr.length===0){                   //checks if the playlist is empty
@@ -130,9 +130,9 @@ function editPlaylist(playlistId, songId) {
 function playlistDuration(id) {
   try{
   let total = 0;
-  const arr = ObjectById(player.playlists,id).songs;
+  const arr = getById(player.playlists,id).songs;
   for(let i = 0; i < arr.length; i++){
-    total += ObjectById(player.songs,arr[i]).duration; //getting the song duration from the property songs in player
+    total += getById(player.songs,arr[i]).duration; //getting the song duration from the property songs in player
   }
   return total;
 }
@@ -148,13 +148,13 @@ function searchByQuery(query) {
     for(let cell of player.songs) {    
         for(let prop in cell) {       // for every property in every cell of the songs array
           if(`${cell[prop]}`.toLowerCase().includes(query,0))
-             if(IndexById(result.songs,cell.id)===undefined)  // I dont want songs to appear more than once
+             if(getById(result.songs,cell.id)===undefined)  // I dont want songs to appear more than once
                  result.songs.push(cell);
         }
     }
     for(let cell of player.playlists){     // for every cell of the playlists array
       if(cell.name.toLowerCase().includes(query,0)) 
-         if(IndexById(result.playlists,cell.id)===undefined) //  I dont want playlists to appear more than once
+         if(getById(result.playlists,cell.id)===undefined) //  I dont want playlists to appear more than once
              result.playlists.push(cell);
     }
       result.songs.sort((a,b) => { if(a.title < b.title) return -1});   //just sorting didnt wanna use an extra function
@@ -222,28 +222,15 @@ function showDuration(duration){
 } 
 
 
-//gets an id of Item in an array and returning the whole object
-// returns undefined if not found
-function ObjectById(arr,id){  
-try {
-  for(let i of arr){
-    if(i.id==id) return i;
-  }
-      return undefined;
-}
-catch {
-  throw "You should call this function with an array and an id of an item in that array";
-}
-}
 
-
-// find the index of an Item with given id,
-// return the index at the array
-// returns undefined if not found 
-function IndexById(arr,find) {
+// function gets an array and id, check if the array have a cell with that id.
+// returns the object or the index based on how the function was called.
+// using it also to know if an array consists of somethign where indexOf didnt work
+// return undefined if wasnt
+function getById(arr,id) {
 try {
     for(let i of arr){
-      if(i.id==find){
+      if(i.id==id){
        return i;
     }
   }
