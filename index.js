@@ -88,6 +88,7 @@ function removePlaylist(id) {
     player.playlists.splice(getById(player.playlists,id),1);  //remove one cell from the index
 }
 
+
 function createPlaylist(name, id = generateId(player.playlists))  {
   if(getById(player.playlists,id)!==undefined) throw "This ID is Taken";
       player.playlists.push({
