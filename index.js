@@ -83,11 +83,11 @@ function removeSong(id) {
   }
   
   
-
 function removePlaylist(id) {
   if(getById(player.playlists,id)===undefined) throw "non-existent Playlist ID";
     player.playlists.splice(getById(player.playlists,id),1);  //remove one cell from the index
 }
+
 
 function createPlaylist(name, id = generateId(player.playlists))  {
   if(getById(player.playlists,id)!==undefined) throw "This ID is Taken";
